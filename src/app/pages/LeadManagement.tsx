@@ -139,7 +139,6 @@ function DraggableCard({ lead, onStatusChange }: DraggableCardProps) {
             <div>
               <div className="flex items-center gap-1">
                 <span style={{ fontFamily: "Inter", fontSize: "12px", fontWeight: 600, color: "#0F172A" }}>{lead.name}</span>
-                {lead.leadScore >= 80 && <span style={{ fontSize: "9px" }}>🔥</span>}
               </div>
               <div style={{ fontFamily: "Inter", fontSize: "10px", color: "#94A3B8" }}>{lead.id} · {lead.phone}</div>
             </div>
@@ -360,13 +359,14 @@ function DropColumn({ status, leads: colLeads, color, bg, textColor, dotColor, o
   return (
     <div
       ref={drop as any}
-      className="flex flex-col rounded-xl overflow-hidden transition-all"
+      className="flex flex-col rounded-xl overflow-hidden transition-all flex-1"
       style={{
-        minWidth: "210px",
-        background: isOver ? bg : "#F8FAFC",
+        minWidth: "280px",
+        flex: "1 1 0",
+        background: isOver ? bg : bg + "80",
         border: `1.5px solid ${isOver ? dotColor : "#E2E8F0"}`,
-        boxShadow: isOver ? `0 0 0 3px ${dotColor}25` : "none",
-        flex: 1,
+        boxShadow: isOver ? `0 0 0 3px ${dotColor}25` : "0 2px 8px rgba(0,0,0,0.04)",
+        borderRadius: "12px",
       }}
     >
       {/* Column Header */}
@@ -537,23 +537,19 @@ export function LeadManagement() {
 
               <div style={{ width: "1px", height: "32px", background: "#E2E8F0" }} />
 
-              {overdueLeads > 0 ? (
+              {overdueLeads > 0 && (
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "#FFF7ED", border: "1px solid #FED7AA" }}>
                   <AlertTriangle size={13} style={{ color: "#F97316" }} />
                   <span style={{ fontFamily: "Inter", fontSize: "11px", color: "#C2410C", fontWeight: 500 }}>
                     <strong>{overdueLeads} leads</strong> overdue for follow-up
                   </span>
                 </div>
-              ) : (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "#ECFDF5", border: "1px solid #A7F3D0" }}>
-                  <span style={{ fontFamily: "Inter", fontSize: "11px", color: "#065F46", fontWeight: 500 }}>✅ All follow-ups on track</span>
-                </div>
               )}
             </div>
           </div>
 
           {/* Kanban Board */}
-          <div className="flex gap-3 overflow-x-auto pb-4" style={{ minHeight: "calc(100vh - 330px)" }}>
+          <div className="flex gap-4 overflow-x-auto pb-4" style={{ minHeight: "calc(100vh - 330px)" }}>
             {columns.map((col) => (
               <DropColumn
                 key={col.status}

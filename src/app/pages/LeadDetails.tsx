@@ -199,7 +199,7 @@ export function LeadDetails() {
                   <div>
                     <div style={{ fontFamily: "Inter", fontSize: "11px", color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.5px" }}>Lead Score</div>
                     <div style={{ fontFamily: "Inter", fontSize: "12px", fontWeight: 600, color: lead.leadScore >= 80 ? "#10B981" : "#F97316", marginTop: "2px" }}>
-                      {lead.leadScore >= 80 ? "🔥 Hot Lead" : lead.leadScore >= 60 ? "⚡ Warm Lead" : "❄️ Cold Lead"}
+                      {lead.leadScore >= 80 ? "Hot Lead" : lead.leadScore >= 60 ? "Warm Lead" : "Cold Lead"}
                     </div>
                   </div>
                 </div>

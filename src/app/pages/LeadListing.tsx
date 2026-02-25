@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Layout } from "../components/layout/Layout";
+import { LeadDetailSlideOver } from "../components/LeadDetailSlideOver";
 import { LeadStatus } from "../data/leads";
 import { useLeads } from "../context/LeadsContext";
 import { AddLeadModal } from "../components/AddLeadModal";
@@ -130,6 +131,8 @@ export function LeadListing() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeKpi, setActiveKpi] = useState<string | null>(null);
+  const [hoveredKpi, setHoveredKpi] = useState<string | null>(null);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
 
   // Dynamic KPI values from live data
   const today = new Date().toISOString().split("T")[0];
@@ -184,6 +187,7 @@ export function LeadListing() {
     .sort((a, b) => activeKpi === "score" ? b.leadScore - a.leadScore : 0);
 
   const deleteTarget = deleteId ? leads.find((l) => l.id === deleteId) : null;
+  const selectedLead = selectedLeadId ? leads.find((l) => l.id === selectedLeadId) : null;
 
   return (
     <Layout>
@@ -191,36 +195,16 @@ export function LeadListing() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 style={{ fontFamily: "Inter", fontWeight: 700, fontSize: "22px", color: "#0F172A", margin: 0 }}>Leads</h1>
-            <p style={{ fontFamily: "Inter", fontSize: "13px", color: "#64748B", marginTop: "2px" }}>
-              {leads.length} total leads · Click a KPI card to filter instantly
-            </p>
+            <h1 style={{ fontFamily: "Inter", fontWeight: 700, fontSize: "22px", color: "#0A0E27", margin: 0 }}>Leads</h1>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors"
-              style={{ border: "1px solid #E2E8F0", background: "#FFFFFF", fontFamily: "Inter", fontSize: "13px", fontWeight: 500, color: "#475569" }}
-            >
-              <Download size={14} />
-              Export CSV
-            </button>
-            <button
-              onClick={() => navigate("/kanban")}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl"
-              style={{ background: "#EFF6FF", fontFamily: "Inter", fontSize: "13px", fontWeight: 500, color: "#2563EB", border: "1px solid #BFDBFE" }}
-            >
-              <SlidersHorizontal size={14} />
-              Kanban View
-            </button>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl text-white transition-opacity hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)", fontFamily: "Inter", fontSize: "13px", fontWeight: 600, boxShadow: "0 2px 8px rgba(37,99,235,0.3)" }}
-            >
-              <Plus size={15} />
-              Add Lead
-            </button>
-          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-5 py-2 rounded-xl text-white transition-opacity hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)", fontFamily: "Inter", fontSize: "13px", fontWeight: 600, boxShadow: "0 2px 8px rgba(37,99,235,0.3)" }}
+          >
+            <Plus size={15} />
+            Add Lead
+          </button>
         </div>
 
         {/* KPI Cards — clickable with sparklines */}
@@ -228,68 +212,48 @@ export function LeadListing() {
           {kpiCards.map((kpi) => {
             const Icon = kpi.icon;
             const isActive = activeKpi === kpi.filterKey;
+            const isHovered = hoveredKpi === kpi.filterKey;
+            const isHighlighted = isActive || isHovered;
             const sparkData = kpiSparklines[kpi.label] || [];
             return (
               <button
                 key={kpi.label}
+                onMouseEnter={() => setHoveredKpi(kpi.filterKey)}
+                onMouseLeave={() => setHoveredKpi(null)}
                 onClick={(e) => { e.stopPropagation(); handleKpiClick(kpi.filterKey); }}
-                className="rounded-xl p-4 text-left transition-all"
+                className="rounded-xl p-4 text-left transition-all duration-300 group cursor-pointer"
                 style={{
-                  background: isActive ? kpi.color : "#FFFFFF",
-                  border: `1.5px solid ${isActive ? kpi.color : "#E2E8F0"}`,
-                  boxShadow: isActive ? `0 4px 16px ${kpi.color}30` : "0 1px 4px rgba(0,0,0,0.05)",
-                  transform: isActive ? "translateY(-2px)" : "none",
-                  cursor: "pointer",
+                  background: isHighlighted ? kpi.color : "#FFFFFF",
+                  border: `1.5px solid ${isHighlighted ? kpi.color : "#DDD6FE"}`,
+                  boxShadow: isHighlighted ? `0 12px 32px ${kpi.color}20` : "0 8px 24px rgba(99,102,241,0.08)",
+                  transform: isHighlighted ? "translateY(-4px)" : "translateY(0)",
                 }}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div
-                    className="flex items-center justify-center w-9 h-9 rounded-xl"
-                    style={{ background: isActive ? "rgba(255,255,255,0.2)" : kpi.bg }}
+                    className="flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300"
+                    style={{ background: isHighlighted ? "rgba(255,255,255,0.2)" : kpi.bg }}
                   >
-                    <Icon size={16} style={{ color: isActive ? "#FFFFFF" : kpi.color }} />
+                    <Icon size={16} style={{ color: isHighlighted ? "#FFFFFF" : kpi.color, transition: "color 300ms" }} />
                   </div>
                   {isActive ? (
                     <span style={{ fontFamily: "Inter", fontSize: "10px", fontWeight: 600, color: "rgba(255,255,255,0.8)", background: "rgba(255,255,255,0.15)", padding: "2px 8px", borderRadius: "20px" }}>
                       Filtering ✓
                     </span>
-                  ) : (
-                    <span style={{ fontFamily: "Inter", fontSize: "11px", color: "#10B981", fontWeight: 500, background: "#F0FDF4", padding: "2px 8px", borderRadius: "20px" }}>
-                      {kpi.change}
-                    </span>
-                  )}
+                  ) : null}
                 </div>
-                <div style={{ fontFamily: "Inter", fontSize: "24px", fontWeight: 700, color: isActive ? "#FFFFFF" : "#0F172A" }}>{kpi.value}</div>
-                <div style={{ fontFamily: "Inter", fontSize: "12px", color: isActive ? "rgba(255,255,255,0.8)" : "#64748B", marginTop: "2px", marginBottom: "8px" }}>{kpi.label}</div>
+                <div style={{ fontFamily: "Inter", fontSize: "24px", fontWeight: 700, color: isHighlighted ? "#FFFFFF" : "#0F172A", transition: "color 300ms" }}>{kpi.value}</div>
+                <div style={{ fontFamily: "Inter", fontSize: "12px", color: isHighlighted ? "rgba(255,255,255,0.9)" : "#64748B", marginTop: "2px", marginBottom: "8px", transition: "color 300ms" }}>{kpi.label}</div>
                 {/* Mini Sparkline */}
                 <div style={{ opacity: 0.7 }}>
-                  <MiniSparkline data={sparkData} color={isActive ? "#FFFFFF" : kpi.color} width={100} height={24} />
+                  <MiniSparkline data={sparkData} color={isHighlighted ? "#FFFFFF" : kpi.color} width={100} height={24} />
                 </div>
               </button>
             );
           })}
         </div>
 
-        {/* Active Filter Banner */}
-        {activeKpi && activeKpi !== "all" && (
-          <div
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl mb-4"
-            style={{ background: "#EFF6FF", border: "1px solid #BFDBFE" }}
-          >
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-            <span style={{ fontFamily: "Inter", fontSize: "12px", fontWeight: 500, color: "#1D4ED8" }}>
-              Showing {filtered.length} leads · Filtered by:{" "}
-              <strong>{activeKpi === "hot" ? "Hot Leads (Score ≥ 75)" : activeKpi === "followup" ? "Follow-ups Due Today" : "Sorted by Lead Score"}</strong>
-            </span>
-            <button
-              onClick={() => { setActiveKpi(null); setStatusFilter("All"); }}
-              className="ml-auto flex items-center gap-1"
-              style={{ fontFamily: "Inter", fontSize: "12px", color: "#2563EB", fontWeight: 500 }}
-            >
-              <X size={12} /> Clear filter
-            </button>
-          </div>
-        )}
+
 
         {/* Filters */}
         <div
@@ -392,7 +356,7 @@ export function LeadListing() {
                     gridTemplateColumns: "2fr 1.3fr 1.8fr 1fr 1.2fr 1.2fr 1fr 100px",
                     borderBottom: idx < filtered.length - 1 ? "1px solid #F1F5F9" : "none",
                   }}
-                  onClick={() => navigate(`/lead/${lead.id}`)}
+                  onClick={() => setSelectedLeadId(lead.id)}
                 >
                   {/* Name */}
                   <div className="flex items-center gap-3">
@@ -405,9 +369,6 @@ export function LeadListing() {
                     <div>
                       <div className="flex items-center gap-1.5">
                         <span style={{ fontFamily: "Inter", fontSize: "13px", fontWeight: 600, color: "#0F172A" }}>{lead.name}</span>
-                        {lead.leadScore >= 80 && (
-                          <span style={{ fontSize: "10px" }}>🔥</span>
-                        )}
                       </div>
                       <div style={{ fontFamily: "Inter", fontSize: "11px", color: "#94A3B8", marginTop: "1px" }}>{lead.email}</div>
                     </div>
@@ -552,6 +513,16 @@ export function LeadListing() {
           name={deleteTarget.name}
           onConfirm={() => { deleteLead(deleteId!); setDeleteId(null); }}
           onCancel={() => setDeleteId(null)}
+        />
+      )}
+      
+      {/* Lead Detail Slide-Over Panel */}
+      {selectedLead && (
+        <LeadDetailSlideOver
+          isOpen={!!selectedLeadId}
+          onClose={() => setSelectedLeadId(null)}
+          lead={selectedLead}
+          onStatusChange={(status) => updateLead(selectedLead.id, { status: status as LeadStatus })}
         />
       )}
     </Layout>

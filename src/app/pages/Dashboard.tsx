@@ -105,6 +105,8 @@ export function Dashboard() {
   const navigate = useNavigate();
   const { leads } = useLeads();
   const [expandedKpi, setExpandedKpi] = useState<string | null>(null);
+  const [selectedKpi, setSelectedKpi] = useState<string | null>(null);
+  const [hoveredKpi, setHoveredKpi] = useState<string | null>(null);
 
   // Dynamic KPI values
   const today = new Date().toISOString().split("T")[0];
@@ -160,85 +162,86 @@ export function Dashboard() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 style={{ fontFamily: "Inter", fontWeight: 700, fontSize: "22px", color: "#0F172A", margin: 0 }}>
+            <h1 style={{ fontFamily: "Inter", fontWeight: 700, fontSize: "22px", color: "#0A0E27", margin: 0 }}>
               Business Manager Dashboard
             </h1>
             <p style={{ fontFamily: "Inter", fontSize: "13px", color: "#64748B", marginTop: "2px" }}>
               HSR Motors · February 2026 · Real-time performance overview
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <div
-              className="flex items-center gap-2 px-3 py-2 rounded-xl"
-              style={{ background: "#ECFDF5", border: "1px solid #A7F3D0", fontFamily: "Inter", fontSize: "12px", fontWeight: 500, color: "#065F46" }}
-            >
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              Live Data
-            </div>
-            <button
-              className="px-4 py-2 rounded-xl transition-colors"
-              style={{ border: "1px solid #E2E8F0", background: "#FFFFFF", fontFamily: "Inter", fontSize: "13px", fontWeight: 500, color: "#475569" }}
-            >
-              Feb 1 – Feb 24, 2026 ▾
-            </button>
-          </div>
+          <button
+            className="px-4 py-2 rounded-xl transition-colors"
+            style={{ border: "1px solid #E2E8F0", background: "#FFFFFF", fontFamily: "Inter", fontSize: "13px", fontWeight: 500, color: "#475569" }}
+          >
+            Feb 1 – Feb 24, 2026 ▾
+          </button>
         </div>
 
         {/* KPI Cards */}
         <div className="grid grid-cols-5 gap-4 mb-6">
           {kpis.map((kpi) => {
             const Icon = kpi.icon;
+            const isActive = selectedKpi === kpi.label || hoveredKpi === kpi.label;
+            const isSelected = selectedKpi === kpi.label;
             return (
               <div
                 key={kpi.label}
-                className="rounded-xl p-4 relative overflow-hidden"
-                style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
+                onMouseEnter={() => setHoveredKpi(kpi.label)}
+                onMouseLeave={() => setHoveredKpi(null)}
+                onClick={() => setSelectedKpi(isSelected ? null : kpi.label)}
+                className="rounded-xl p-4 relative overflow-hidden group transition-all duration-300 cursor-pointer"
+                style={{ 
+                  background: isActive ? kpi.color : "#FFFFFF", 
+                  border: `1.5px solid ${isActive ? kpi.color : "#DDD6FE"}`,
+                  boxShadow: isActive ? `0 12px 32px ${kpi.color}20` : "0 8px 24px rgba(99,102,241,0.08)",
+                  transform: isActive ? "translateY(-4px)" : "translateY(0)"
+                }}
               >
                 {/* Background decoration */}
                 <div
-                  className="absolute -right-4 -top-4 w-16 h-16 rounded-full opacity-10"
-                  style={{ background: kpi.color }}
+                  className="absolute -right-4 -top-4 w-16 h-16 rounded-full opacity-20 transition-all duration-300"
+                  style={{ background: isActive ? "#FFFFFF" : kpi.color }}
                 />
                 <div className="flex items-center justify-between mb-3">
                   <div
-                    className="flex items-center justify-center w-10 h-10 rounded-xl"
-                    style={{ background: kpi.bg }}
+                    className="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300"
+                    style={{ background: isActive ? "rgba(255,255,255,0.2)" : kpi.bg }}
                   >
-                    <Icon size={18} style={{ color: kpi.color }} />
+                    <Icon size={18} style={{ color: isActive ? "#FFFFFF" : kpi.color, transition: "color 300ms" }} />
                   </div>
                   <div
-                    className="flex items-center gap-1 px-2 py-1 rounded-lg"
-                    style={{ background: kpi.up ? "#F0FDF4" : "#FEF2F2" }}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg transition-all duration-300"
+                    style={{ background: isActive ? "rgba(255,255,255,0.15)" : (kpi.up ? "#F0FDF4" : "#FEF2F2") }}
                   >
                     {kpi.up ? (
-                      <ArrowUpRight size={12} style={{ color: "#10B981" }} />
+                      <ArrowUpRight size={12} style={{ color: isActive ? "#FFFFFF" : "#10B981", transition: "color 300ms" }} />
                     ) : (
-                      <ArrowDownRight size={12} style={{ color: "#EF4444" }} />
+                      <ArrowDownRight size={12} style={{ color: isActive ? "#FFFFFF" : "#EF4444", transition: "color 300ms" }} />
                     )}
-                    <span style={{ fontFamily: "Inter", fontSize: "11px", fontWeight: 600, color: kpi.up ? "#10B981" : "#EF4444" }}>
+                    <span style={{ fontFamily: "Inter", fontSize: "11px", fontWeight: 600, color: isActive ? "#FFFFFF" : (kpi.up ? "#10B981" : "#EF4444"), transition: "color 300ms" }}>
                       {kpi.change}
                     </span>
                   </div>
                 </div>
-                <div style={{ fontFamily: "Inter", fontSize: "22px", fontWeight: 700, color: "#0F172A" }}>{kpi.value}</div>
-                <div style={{ fontFamily: "Inter", fontSize: "11px", fontWeight: 600, color: "#334155", marginTop: "2px" }}>{kpi.label}</div>
-                <div style={{ fontFamily: "Inter", fontSize: "10px", color: "#94A3B8" }}>{kpi.subtext}</div>
+                <div style={{ fontFamily: "Inter", fontSize: "22px", fontWeight: 700, color: isActive ? "#FFFFFF" : "#0F172A", transition: "color 300ms" }}>{kpi.value}</div>
+                <div style={{ fontFamily: "Inter", fontSize: "11px", fontWeight: 600, color: isActive ? "rgba(255,255,255,0.9)" : "#334155", marginTop: "2px", transition: "color 300ms" }}>{kpi.label}</div>
+                <div style={{ fontFamily: "Inter", fontSize: "10px", color: isActive ? "rgba(255,255,255,0.7)" : "#94A3B8", transition: "color 300ms" }}>{kpi.subtext}</div>
                 <div className="mt-2">
-                  <MiniSparkline data={kpi.spark} color={kpi.color} />
+                  <MiniSparkline data={kpi.spark} color={isActive ? "#FFFFFF" : kpi.color} />
                 </div>
                 <div
                   className="mt-2 cursor-pointer"
-                  onClick={() => setExpandedKpi(expandedKpi === kpi.label ? null : kpi.label)}
+                  onClick={(e) => { e.stopPropagation(); setExpandedKpi(expandedKpi === kpi.label ? null : kpi.label); }}
                 >
-                  <p style={{ fontFamily: "Inter", fontSize: "11px", color: "#64748B" }}>
+                  <p style={{ fontFamily: "Inter", fontSize: "11px", color: isActive ? "rgba(255,255,255,0.7)" : "#64748B", transition: "color 300ms" }}>
                     {kpi.detail}
                   </p>
                 </div>
                 {expandedKpi === kpi.label && (
                   <div className="mt-2">
                     <button
-                      className="px-2 py-1 rounded-lg transition-colors hover:bg-gray-100"
-                      style={{ background: "#F0FDF4", fontFamily: "Inter", fontSize: "11px", fontWeight: 600, color: "#10B981" }}
+                      className="px-2 py-1 rounded-lg transition-all duration-300"
+                      style={{ background: isActive ? "rgba(255,255,255,0.2)" : "#F0FDF4", fontFamily: "Inter", fontSize: "11px", fontWeight: 600, color: isActive ? "#FFFFFF" : "#10B981" }}
                       onClick={kpi.onClick}
                     >
                       View Details
@@ -274,10 +277,10 @@ export function Dashboard() {
                   {leadsBySource.map((entry, index) => (
                     <Cell key={index} fill={
                       index === 0 ? "#2563EB" :
-                      index === 1 ? "#8B5CF6" :
-                      index === 2 ? "#10B981" :
-                      index === 3 ? "#F97316" :
-                      index === 4 ? "#EC4899" : "#94A3B8"
+                      index === 1 ? "#3B82F6" :
+                      index === 2 ? "#60A5FA" :
+                      index === 3 ? "#93C5FD" :
+                      index === 4 ? "#BFDBFE" : "#DBEAFE"
                     } />
                   ))}
                 </Bar>
