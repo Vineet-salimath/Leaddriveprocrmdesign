@@ -22,7 +22,7 @@ export function Navbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
       className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 h-16 backdrop-blur-xl"
       style={{ background: "rgba(255, 255, 255, 0.95)", borderBottom: "1px solid #DDD6FE", boxShadow: "0 8px 24px rgba(99,102,241,0.08)" }}
     >
-      {/* Hamburger + Dealynx Branding */}
+      {/* Hamburger + RevUp Branding */}
       <div className="flex items-center gap-0 min-w-[260px]">
         <button
           onClick={onToggleSidebar}
@@ -44,7 +44,7 @@ export function Navbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
                 display: "block",
               }}
             >
-              Dealynx
+              RevUp
             </span>
           </div>
           <div style={{ fontFamily: "Poppins, Inter, sans-serif", fontWeight: 600, fontSize: "9px", color: "#F59E0B", letterSpacing: "1.2px", textTransform: "uppercase", marginTop: "2px", fontStyle: "italic" }}>
